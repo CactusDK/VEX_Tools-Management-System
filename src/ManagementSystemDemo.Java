@@ -21,11 +21,12 @@ public class ManagementSystemDemo
     private boolean menuShow;
 
     private ArrayList<String> tools;
-    private ArrayList<Integer> number_tools_take = new ArrayList<Integer>(tools.size());
+    private ArrayList<Integer> number_tools_take;
     private ArrayList<Integer> number_tools_back;
 
-    private ArrayList<String> defaultTools = new ArrayList<String>();
-    private ArrayList<Integer> default_number_tools_take = new ArrayList<Integer>(defaultTools.size());
+    public static final int numberOfDefaultToolsList = 20;
+    private ArrayList<String> defaultTools = new ArrayList<String>(numberOfDefaultToolsList);
+    private ArrayList<Integer> default_number_tools_take = new ArrayList<Integer>(numberOfDefaultToolsList);
 
     
 
@@ -37,27 +38,27 @@ public class ManagementSystemDemo
 
     private void initialDefaultList()
     {
-        defaultTools.set(0, "Screw driver");       default_number_tools_take.set(0, 5);
-        defaultTools.set(1, "rancher");            default_number_tools_take.set(1, 5);
-        defaultTools.set(2, "plier");              default_number_tools_take.set(2, 4);
-        defaultTools.set(3, "zitiscutter");        default_number_tools_take.set(3, 1);
-        defaultTools.set(4, "scissor");            default_number_tools_take.set(4, 1);
-        defaultTools.set(5, "file");               default_number_tools_take.set(5, 5);
-        defaultTools.set(6, "saw");                default_number_tools_take.set(6, 1);
-        defaultTools.set(7, "Big drill");          default_number_tools_take.set(7, 1);
-        defaultTools.set(8, "small drill");        default_number_tools_take.set(8, 1);
-        defaultTools.set(9, "yellow cuter");       default_number_tools_take.set(9, 2);
-        defaultTools.set(10, "Remote");            default_number_tools_take.set(10, 1);
-        defaultTools.set(11, "switch");            default_number_tools_take.set(11, 1);
-        defaultTools.set(12, "battery");           default_number_tools_take.set(12, 10);
-        defaultTools.set(13, "green fan");         default_number_tools_take.set(13, 2);
-        defaultTools.set(14, "air pump");          default_number_tools_take.set(14, 1);
-        defaultTools.set(15, "Cart");              default_number_tools_take.set(15, 1);
-        defaultTools.set(16, "Robot box");         default_number_tools_take.set(16, 1);
-        defaultTools.set(17, "robot box cover");   default_number_tools_take.set(17, 1);
-        defaultTools.set(18, "Power bar");         default_number_tools_take.set(18, 1);
-        defaultTools.set(19, "Super cool");        default_number_tools_take.set(19, 2);
-        defaultTools.set(20, "Tweezer");           default_number_tools_take.set(20, 4);
+        defaultTools.add("Screw driver");       default_number_tools_take.add(5);
+        defaultTools.add("rancher");            default_number_tools_take.add(5);
+        defaultTools.add("plier");              default_number_tools_take.add(4);
+        defaultTools.add("zitiscutter");        default_number_tools_take.add(1);
+        defaultTools.add("scissor");            default_number_tools_take.add(1);
+        defaultTools.add("file");               default_number_tools_take.add(5);
+        defaultTools.add("saw");                default_number_tools_take.add(1);
+        defaultTools.add("Big drill");          default_number_tools_take.add(1);
+        defaultTools.add("small drill");        default_number_tools_take.add(1);
+        defaultTools.add("yellow cuter");       default_number_tools_take.add(2);
+        defaultTools.add("Remote");             default_number_tools_take.add(1);
+        defaultTools.add("switch");             default_number_tools_take.add(1);
+        defaultTools.add("battery");            default_number_tools_take.add(10);
+        defaultTools.add("green fan");          default_number_tools_take.add(2);
+        defaultTools.add("air pump");           default_number_tools_take.add(1);
+        defaultTools.add("Cart");               default_number_tools_take.add(1);
+        defaultTools.add("Robot box");          default_number_tools_take.add(1);
+        defaultTools.add("robot box cover");    default_number_tools_take.add(1);
+        defaultTools.add("Power bar");          default_number_tools_take.add(1);
+        defaultTools.add("Super cool");         default_number_tools_take.add(2);
+        defaultTools.add("Tweezer");            default_number_tools_take.add(4);
     }
 
     /**
@@ -74,8 +75,10 @@ public class ManagementSystemDemo
             
             // Initialize the tool list and scanner for each menu loop
             tools = new ArrayList<String>(); // Initialize the tool list
+            number_tools_take = new ArrayList<Integer>(tools.size());
             scan = new Scanner(System.in); // Prepare scanner for input
-    
+            
+            initialDefaultList();
             loadToolsFromFile();
             
             if(menuShow)
@@ -113,7 +116,7 @@ public class ManagementSystemDemo
         }
         else if(choice == 4)
         {
-            compareData(); // Create a new list
+            compareData(tools); // Create a new list
         }
         else if(choice == 5)
         {
@@ -169,8 +172,7 @@ public class ManagementSystemDemo
     private void loadToolsFromFile()
     {
         String fileName;
-        System.out.println("Choose \"Y\" to create a new list, \"N\" to load a list from file (Y/N), \"D\" to use the default list from preset: ");
-        System.out.println("example: \"Screw driver,5,5\" or \"Screw driver,5,\"");
+        System.out.println("Choose \"Y\" to create a new list, \"N\" to load a list from file, \"D\" to use the default list from preset: ");
         String decision = scan.nextLine().trim().toUpperCase();
 
         if (decision.equals("N"))
@@ -201,8 +203,9 @@ public class ManagementSystemDemo
         }
         if(decision.equals("D"))
         {
-            copyTheList(tools, defaultTools);
-            copyTheList(number_tools_take, default_number_tools_take);
+            copyTheStringList(tools, defaultTools);
+            copyTheIntList(number_tools_take, default_number_tools_take);
+            System.out.println("\nSuccessfully use the default list");
             countToolsBack(tools);
             compareData(tools);
             menuShow = false;
@@ -218,13 +221,13 @@ public class ManagementSystemDemo
     private void countToolsBack(ArrayList<String> toolsList)
     {
         number_tools_back = new ArrayList<Integer>(toolsList.size());
-
+        
+        loopAsterisk(20);
+        System.out.println();
         for(int i = 0; i < toolsList.size(); i++)
         {
             System.out.print("Number of " + toolsList.get(i) + " you took back: ");
-            if()
-            int number = scan.nextInt();
-            
+            int number = scan.nextInt();            
 
             while(number < 0)
             {
@@ -237,10 +240,15 @@ public class ManagementSystemDemo
 
     private void compareData(ArrayList<String> toolsList)
     {
+        ArrayList<String> missingTools = new ArrayList<String>();
+        ArrayList<Integer> missingToolsNumber = new ArrayList<Integer>();
+        ArrayList<String> ExtraTools = new ArrayList<String>();
+        ArrayList<Integer> ExtraToolsNumber = new ArrayList<Integer>();
+        
         if(toolsList.isEmpty())
         {
             System.out.println("The tools list is empty. Please add tools first.\n");
-            return;
+            addTools();
         }
         if(number_tools_back.isEmpty())
         {
@@ -263,10 +271,14 @@ public class ManagementSystemDemo
             System.out.println("    Took Back: " + tookBack);
             if(difference > 0)
             {
+                missingTools.add(toolName);
+                missingToolsNumber.add(difference);
                 System.out.println("Missing: " + difference);
             }
             else if(difference < 0)
             {
+                ExtraTools.add(toolName);
+                ExtraToolsNumber.add(-difference);
                 System.out.println("Extra: " + (-difference));
             }
             else
@@ -277,10 +289,34 @@ public class ManagementSystemDemo
                 }
                 else
                 {
-                    System.out.println(toolName + "is backed.");
+                    System.out.println(toolName + " is backed.");
                 }
             }
             System.out.println("-----------------------------------------------");
+        }
+        
+        System.out.println("\nSummary: \n");
+        if(!missingTools.isEmpty())
+        {
+            for(int i = 0; i < missingTools.size(); i++)
+            {
+                System.out.println(missingTools.get(i) + ": " + missingToolsNumber.get(i) + " missing");
+            }
+            
+            System.out.println();
+        }
+        if(!ExtraTools.isEmpty())
+        {
+            for(int i = 0; i < ExtraTools.size(); i++)
+            {
+                System.out.println(ExtraTools.get(i) + ": " + ExtraToolsNumber.get(i) + " extra");
+            }
+            
+            System.out.println();
+        }
+        if(missingTools.isEmpty() && ExtraTools.isEmpty())
+        {
+            System.out.println("Everything is back");
         }
         System.out.println("***********************************************\n");
     }
@@ -372,7 +408,8 @@ public class ManagementSystemDemo
     private void createNewList(boolean notReplaceAll)
     {
         tools = new ArrayList<String>();
-        System.out.println("Enter tool's informations in the format (no space between comma): \"Tool's name,number of it which you took away,number of it which you took back\"");
+        System.out.println("Enter tool's informations in the format (no space between comma): \"Tool's name,number that you took away,number that you took back\"");
+        System.out.println("example: \"Screw driver,5,5\" or \"Screw driver,5,\"");
         System.out.println("Type \"DONE\" when you are finished, or enter another tool's informations");
     
         while (true)
@@ -592,7 +629,7 @@ public class ManagementSystemDemo
         return false;
     }
 
-    private void copyTheList(ArrayList<String> emptyList, ArrayList<String> contentList)
+    private void copyTheStringList(ArrayList<String> emptyList, ArrayList<String> contentList)
     {
         for(String data: contentList)
         {
@@ -600,7 +637,7 @@ public class ManagementSystemDemo
         }
     }
 
-    private void copyTheList(ArrayList<Integer> emptyList, ArrayList<Integer> contentList)
+    private void copyTheIntList(ArrayList<Integer> emptyList, ArrayList<Integer> contentList)
     {
         for(Integer data: contentList)
         {
