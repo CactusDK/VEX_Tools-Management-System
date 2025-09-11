@@ -1,5 +1,4 @@
 import java.util.Scanner;
-import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,7 +8,9 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.IOException;
+
 import java.awt.HeadlessException;
+import java.lang.NumberFormatException;
 
 /**
  * This is a demo to manage tools during the competition.
@@ -20,7 +21,7 @@ public class ManagementSystemDemo
     private String currentFile;
     private boolean menuShow;
 
-    private ArrayList<String> tools;
+    private ArrayList<String> tools, toolsName;
     private ArrayList<Integer> number_tools_take;
     private ArrayList<Integer> number_tools_back;
 
@@ -67,6 +68,7 @@ public class ManagementSystemDemo
      */
     public void toolManagement()
     {
+        initialDefaultList();
         do
         {
             System.out.println("\f"); // Clears the screen
@@ -78,7 +80,7 @@ public class ManagementSystemDemo
             number_tools_take = new ArrayList<Integer>(tools.size());
             scan = new Scanner(System.in); // Prepare scanner for input
             
-            initialDefaultList();
+            
             loadToolsFromFile();
             
             if(menuShow)
@@ -94,13 +96,14 @@ public class ManagementSystemDemo
         // Display menu options
         System.out.println("Choose an option:");
         System.out.println("1: Add tools");
-        System.out.println("2: Remove tools");
-        System.out.println("3: List all tools");
-        System.out.println("4: Compare the tools you took away and took back");
-        System.out.println("5: Save");
-        System.out.println("6: Exit");
+        System.out.println("2: Change tools' information");
+        System.out.println("3: Remove tools");
+        System.out.println("4: List all tools");
+        System.out.println("5: Compare the tools you took away and took back");
+        System.out.println("6: Save");
+        System.out.println("7: Exit");
         // Get a valid menu option from the user
-        int choice = getValidIntInput("Enter your choice (1-6): ", 1, 6);
+        int choice = getValidIntInput("Enter your choice (1-7): ", 1, 7);
         
         if (choice == 1)
         {
@@ -108,21 +111,25 @@ public class ManagementSystemDemo
         }
         else if (choice == 2)
         {
-            deleteTools(); // Call method to delete tools
+            changeToolsData(); // Change the information of tools in the list
         }
         else if (choice == 3)
         {
-            FileReading(true); // Display tools list
+            deleteTools(); // Call method to delete tools
         }
-        else if(choice == 4)
+        else if (choice == 4)
         {
-            compareData(tools); // Create a new list
+            FileReading(true); // Display tools list
         }
         else if(choice == 5)
         {
+            compareData(tools); // Create a new list
+        }
+        else if(choice == 6)
+        {
             saveToFile(tools, false); //Save to the current file or another file
         }
-        else if (choice == 6)
+        else if (choice == 7)
         {
             System.out.println("Exit.");
             return; // Exit program
@@ -194,6 +201,10 @@ public class ManagementSystemDemo
                     }
                     fileReading.close();
                     currentFile = fileName;
+                    
+                    getToolsName(tools);
+                    getTakeNumber(tools);
+                    getBackNumber(tools);
                 }
                 catch (FileNotFoundException e)
                 {
@@ -257,18 +268,18 @@ public class ManagementSystemDemo
             countToolsBack(toolsList);
         }
         
-        System.out.println("\nComparison of tools taken away and taken back:");
+        System.out.println("\nComparison of tools taken away and brought back:");
         System.out.println("***********************************************");
         for(int i = 0; i < toolsList.size(); i++)
         {
-            String toolName = toolsList.get(i);
+            String toolName = toolsName.get(i);
             int tookAway = number_tools_take.get(i);
-            int tookBack = number_tools_back.get(i);
-            int difference = tookAway - tookBack;
+            int broughtBack = number_tools_back.get(i);
+            int difference = tookAway - broughtBack;
 
             System.out.print("Tool: " + toolName);
             System.out.print("    Took Away: " + tookAway);
-            System.out.println("    Took Back: " + tookBack);
+            System.out.println("    Brought Back: " + broughtBack);
             if(difference > 0)
             {
                 missingTools.add(toolName);
@@ -407,34 +418,31 @@ public class ManagementSystemDemo
      */
     private void createNewList(boolean notReplaceAll)
     {
+        String newToolData = "";
         tools = new ArrayList<String>();
-        System.out.println("Enter tool's informations in the format (no space between comma): \"Tool's name,number that you took away,number that you took back\"");
-        System.out.println("example: \"Screw driver,5,5\" or \"Screw driver,5,\"");
+        System.out.println("Enter tool's informations: ");// in the format (no space between comma): \"Tool's name,number that you took away,number that you took back\"");
+        //System.out.println("example: \"Screw driver,5,5\" or \"Screw driver,5,\"");
         System.out.println("Type \"DONE\" when you are finished, or enter another tool's informations");
-    
+        
         while (true)
         {
-            System.out.println("Enter tool's data (or \"DONE\" to stop): ");
+            System.out.println("Enter \"START\" to start or \"DONE\" to stop: ");
             String input = scan.nextLine().trim();
     
-            if (input.equalsIgnoreCase("DONE"))
+            if(input.equalsIgnoreCase("DONE"))
             {
                 break;
             }
-    
-            if (validateToolsData(input))
+            else if(input.equalsIgnoreCase("START"))
             {
-                tools.add(input);
-    
+                newToolData = getNewData();
+                tools.add(newToolData);
+                
                 System.out.println();
-                loopAsterisk(input.length() + 24);
-                System.out.println("\n* tool's information added: " + input + " *");
-                loopAsterisk(input.length() + 24);
+                loopAsterisk(newToolData.length() + 24);
+                System.out.println("\n* tool's information added: " + newToolData + " *");
+                loopAsterisk(newToolData.length() + 24);
                 System.out.println("\n");
-            }
-            else
-            {
-                System.out.println("Invalid format! Please enter the data again.");
             }
         }
     
@@ -449,6 +457,42 @@ public class ManagementSystemDemo
             System.out.println("Changes were not saved.\n");
             return;
         }
+    }
+    
+    private String getNewData()
+    {
+        StringBuilder result = new StringBuilder();
+        String newToolName, number = "";
+        int toolNumber = 0;
+        
+        System.out.print("Tool's name: ");
+        newToolName = scan.nextLine().trim();
+        result.append(newToolName);
+        
+        for(int i = 0; i < 2; i++)
+        {
+            if(i == 0)
+            {
+                System.out.print("\nnumber that you took away: ");
+            }
+            else
+            {
+                System.out.println("\nnumber that you brought back: (0 indicates that nothing was brought back or not count yet.)");
+            }
+            try
+            {
+                number = scan.nextLine().trim();
+                Double.parseDouble(number);
+            }
+            catch (NumberFormatException e)
+            {
+                System.out.println("Please input valid number!");
+            }
+            toolNumber = Integer.parseInt(number);
+            result.append(",").append(number);
+        }
+        
+        return result.toString();
     }
 
     /**
@@ -571,7 +615,6 @@ public class ManagementSystemDemo
 
     private void printToolsData()
     {
-
         for (int i = 0; i < tools.size(); i++)
         {
             String toolsDataInFile = tools.get(i);
@@ -579,7 +622,7 @@ public class ManagementSystemDemo
             String toolName = tokenizer.nextToken();
             System.out.println("(" + (i + 1) + ") Tool's name: " + toolName);
             
-            int moreTokensCount = 0;    
+            int moreTokensCount = 0;
             while (tokenizer.hasMoreTokens())
             {
                 moreTokensCount++;
@@ -592,8 +635,6 @@ public class ManagementSystemDemo
                 {
                     System.out.println("Take Back: " + number);
                 }
-                
-                
             }
 
             if(i == tools.size() - 1)
@@ -628,7 +669,145 @@ public class ManagementSystemDemo
         }
         return false;
     }
-
+    
+    private void getToolsName(ArrayList<String> toolList)
+    {
+        toolsName = new ArrayList<String>();
+        
+        for (int i = 0; i < toolList.size(); i++)
+        {
+            String toolsDataInFile = tools.get(i);
+            StringTokenizer tokenizer = new StringTokenizer(toolsDataInFile, ",");
+            String toolName = tokenizer.nextToken();
+            toolsName.add(toolName);
+        }
+    }
+    
+    private void getTakeNumber(ArrayList<String> toolList)
+    {
+        number_tools_take = new ArrayList<Integer>();
+        String number;
+        int takeNumber;
+        
+        for (int i = 0; i < toolList.size(); i++)
+        {
+            String toolsDataInFile = tools.get(i);
+            StringTokenizer tokenizer = new StringTokenizer(toolsDataInFile, ",");
+            String toolName = tokenizer.nextToken();
+            
+            int numberOfToolTake = 0;
+            try
+            {
+                number = tokenizer.nextToken();
+                Double.parseDouble(number);
+                takeNumber = Integer.parseInt(number);
+                numberOfToolTake = takeNumber;//replace the number until the end, which is exactly the number of tool back
+            }
+            catch (NumberFormatException e)
+            {
+                System.out.println(e);
+                System.out.println("Please check the file, make sure the format is in \"name,number,number\"");
+                return;
+            }
+            number_tools_take.add(numberOfToolTake);
+        }
+    }
+    
+    private void getBackNumber(ArrayList<String> toolList)
+    {
+        number_tools_back = new ArrayList<Integer>();
+        String number;
+        int backNumber;
+        
+        for (int i = 0; i < toolList.size(); i++)
+        {
+            String toolsDataInFile = tools.get(i);
+            StringTokenizer tokenizer = new StringTokenizer(toolsDataInFile, ",");
+            String toolName = tokenizer.nextToken();
+            
+            int numberOfToolBack = 0;
+            while (tokenizer.hasMoreTokens())
+            {
+                try
+                {
+                    number = tokenizer.nextToken();
+                    Double.parseDouble(number);
+                    backNumber = Integer.parseInt(number);
+                    numberOfToolBack = backNumber;//replace the number until the end, which is exactly the number of tool back
+                }
+                catch (NumberFormatException e)
+                {
+                    System.out.println(e);
+                    System.out.println("Please check the file, make sure the format is in \"name,number,number\"");
+                    return;
+                }
+            }
+            number_tools_back.add(numberOfToolBack);
+        }
+    }
+    
+    private void changeToolsData()
+    {
+        StringBuilder newData = new StringBuilder();
+        String newName, newNumber;
+        
+        printToolsData();
+        
+        while(true)
+        {
+            System.out.println("Which tool's data do you want to change, input \"0\" to finish at anywhere: ");
+            int toolChoice = getValidIntInput("Enter your choice (1-" + tools.size() + "): ", 0, tools.size());
+            if(toolChoice == 0)
+            {
+                break;
+            }
+            
+            System.out.println("Please start changing, input \"DONE\" to finish at anywhere");
+            for(int i = 0; i < 3; i++)
+            {
+                if(i == 0)
+                {
+                    System.out.print("New tool's name: ");
+                    newName = scan.nextLine().trim();
+                    if (newName.equalsIgnoreCase("DONE"))
+                    {
+                        break;
+                    }
+                    newData.append(newName);
+                }
+                if(i > 0)
+                {
+                    if(i == 1)
+                    {
+                        System.out.print("\nNumber you took away: ");
+                    }
+                    if(i == 2)
+                    {
+                        System.out.println("\nNumber you brought back");
+                    }
+                    try
+                    {
+                        newNumber = scan.nextLine().trim();
+                        if (newNumber.equalsIgnoreCase("DONE"))
+                        {
+                            break;
+                        }
+                        Double.parseDouble(newNumber);
+                        newData.append(",").append(newNumber);
+                    }
+                    catch (NumberFormatException e)
+                    {
+                        System.out.println("Please input valid number!");
+                    }
+                }
+            }
+            
+            tools.set(toolChoice - 1, newData.toString());
+        }
+        
+        saveToFile(tools, false);
+    }
+    
     private void copyTheStringList(ArrayList<String> emptyList, ArrayList<String> contentList)
     {
         for(String data: contentList)
