@@ -212,7 +212,7 @@ public class ManagementSystemDemo
                 }
             }
         }
-        if(decision.equals("D"))
+        else if(decision.equals("D"))
         {
             copyTheStringList(tools, defaultTools);
             copyTheIntList(number_tools_take, default_number_tools_take);
@@ -222,10 +222,15 @@ public class ManagementSystemDemo
             menuShow = false;
             return;
         }
-        if(decision.equals("Y"))
+        else if(decision.equals("Y"))
         {
             System.out.println();
             createNewList(false);
+        }
+        else
+        {
+            System.out.println("Please input \"Y\" , \"N\" or \"D\"");
+            loadToolsFromFile();
         }
     }
 
@@ -748,13 +753,14 @@ public class ManagementSystemDemo
     
     private void changeToolsData()
     {
-        StringBuilder newData = new StringBuilder();
+        StringBuilder newData;
         String newName, newNumber;
         
         printToolsData();
         
         while(true)
         {
+            newData = new StringBuilder();
             System.out.println("Which tool's data do you want to change, input \"0\" to finish at anywhere: ");
             int toolChoice = getValidIntInput("Enter your choice (1-" + tools.size() + "): ", 0, tools.size());
             if(toolChoice == 0)
@@ -779,11 +785,11 @@ public class ManagementSystemDemo
                 {
                     if(i == 1)
                     {
-                        System.out.print("\nNumber you took away: ");
+                        System.out.print("Number you took away: ");
                     }
                     if(i == 2)
                     {
-                        System.out.println("\nNumber you brought back");
+                        System.out.print("Number you brought back: ");
                     }
                     try
                     {
@@ -804,7 +810,6 @@ public class ManagementSystemDemo
             
             tools.set(toolChoice - 1, newData.toString());
         }
-        
         saveToFile(tools, false);
     }
     
